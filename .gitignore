@@ -1,2 +1,4 @@
-datasets
-embeddings
+datasets/
+embeddings/
+venv/
+*.bin
