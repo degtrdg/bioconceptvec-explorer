@@ -9,7 +9,8 @@ from fastapi import FastAPI
 from sklearn.metrics.pairwise import cosine_similarity
 
 mounts = [
-    modal.Mount.from_local_dir("./embeddings/", remote_path="/root/embeddings/"),
+    modal.Mount.from_local_dir(
+        "./embeddings/", remote_path="/root/embeddings/"),
 ]
 
 image = modal.Image.debian_slim().pip_install_from_requirements("requirements.txt")
@@ -24,6 +25,7 @@ def solve_equation(
     k: int = 10,
     concept_vectors: list = None,
     concept_values: np.ndarray = None,
+    useCosineSimilarity: bool = True,
 ) -> dict:
     LHS, RHS = parse_equation(equation)
     LHS, RHS = solve_for_x(LHS, RHS)
@@ -33,7 +35,8 @@ def solve_equation(
         print("Loading concept embeddings...")
         with open("./embeddings/concept_glove.json") as json_file:
             concept_vectors = json.load(json_file)
-            concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
+            concept_values = np.array(
+                list(concept_vectors.values()), dtype=np.float32)
 
     # compute x vector
     result = np.zeros(np.array(concept_values[0]).shape, dtype=np.float32)
@@ -48,17 +51,25 @@ def solve_equation(
         for variable in RHS["negative"]:
             result += concept_vectors[variable]
     else:
-        raise ValueError("Solved equation does not contain x isolated on one side")
+        raise ValueError(
+            "Solved equation does not contain x isolated on one side")
 
-    # compute similarity between x vector and all other vectors
-    similarities = cosine_similarity(concept_values, [result]).flatten()
+    top_concepts = {}
+    similarities = None
+
+    if useCosineSimilarity:
+        # compute similarity between x vector and all other vectors
+        similarities = cosine_similarity(concept_values, [result]).flatten()
+    else:
+        # compute distance between x vector and all other vectors
+        similarities = np.linalg.norm(concept_values - result, axis=1)
 
     # return top k most similar concepts
-    top_concepts = {}
     for concept, similarity in zip(concept_vectors.keys(), similarities):
         top_concepts[concept] = similarity
     top_concepts = dict(
-        sorted(top_concepts.items(), key=lambda item: item[1], reverse=True)[:k]
+        sorted(top_concepts.items(),
+               key=lambda item: item[1], reverse=useCosineSimilarity)[:k]
     )
 
     return top_concepts
@@ -175,7 +186,8 @@ def find_equations(sim_threshold: int = 0.95, n: int = 1000):
         ).popitem()
         if sim > sim_threshold:
             good_equations.append((equation, concept, sim))
-            print(f"Equation: {equation} | Solution: {concept} | Similarity: {sim}")
+            print(
+                f"Equation: {equation} | Solution: {concept} | Similarity: {sim}")
 
     # now take the top 10% of the good equations and mutate them by
     # # finding most similar 10 concepts to each variable
