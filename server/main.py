@@ -1,3 +1,4 @@
+import random
 from tqdm import tqdm
 import numpy as np
 import re
@@ -5,31 +6,37 @@ import os
 import json
 import modal
 from fastapi import FastAPI
+from sklearn.metrics.pairwise import cosine_similarity
 
-# todo fix the code and deploy as api
+mounts = [
+    modal.Mount.from_local_dir("./embeddings/", remote_path="/root/embeddings/"),
+]
+
+image = modal.Image.debian_slim().pip_install_from_requirements("requirements.txt")
+
+stub = modal.Stub("bioconceptvec", image=image, mounts=mounts)
 
 
-# app = FastAPI()
-# image = modal.Image.debian_slim().pip_install_from_requirements("requirements.txt")
-# stub = modal.Stub("landingpage-autobuild", image=image)
-# mounts = [
-#     modal.Mount.from_local_file("../embeddings/", remote_path="/root/embeddings/"),
-# ]
-
-# @stub.function(mounts=mounts)
-# @web_endpoint(method="GET", path="/")
-def component_gen(
+@stub.function()
+@modal.web_endpoint(method="GET")
+def solve_equation(
     equation: str,
+    k: int = 10,
+    concept_vectors: list = None,
+    concept_values: np.ndarray = None,
 ) -> dict:
     LHS, RHS = parse_equation(equation)
     LHS, RHS = solve_for_x(LHS, RHS)
 
     # load concept embedding
-    with open("../embeddings/concept_glove.json") as json_file:
-        concept_vectors = json.load(json_file)
-    
+    if concept_values is None or concept_vectors is None:
+        print("Loading concept embeddings...")
+        with open("./embeddings/concept_glove.json") as json_file:
+            concept_vectors = json.load(json_file)
+            concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
+
     # compute x vector
-    result = np.zeros(np.array(concept_vectors["Gene_2997"]).shape)
+    result = np.zeros(np.array(concept_values[0]).shape, dtype=np.float32)
     if "x" in RHS["positive"]:
         for variable in LHS["positive"]:
             result += concept_vectors[variable]
@@ -42,25 +49,23 @@ def component_gen(
             result += concept_vectors[variable]
     else:
         raise ValueError("Solved equation does not contain x isolated on one side")
-    
+
     # compute similarity between x vector and all other vectors
-    similarity = {}
-    for concept, vector in tqdm(concept_vectors.items()):
-        similarity[concept] = np.dot(result, vector) / (np.linalg.norm(result) * np.linalg.norm(vector))
-    
-    # return top 10 most similar concepts
-    K = 10
+    similarities = cosine_similarity(concept_values, [result]).flatten()
+
+    # return top k most similar concepts
     top_concepts = {}
-    for i, (concept, sim) in enumerate(sorted(similarity.items(), key=lambda x: x[1], reverse=True)):
-        if i == K:
-            break
-        top_concepts[concept] = sim
-    
+    for concept, similarity in zip(concept_vectors.keys(), similarities):
+        top_concepts[concept] = similarity
+    top_concepts = dict(
+        sorted(top_concepts.items(), key=lambda item: item[1], reverse=True)[:k]
+    )
+
     return top_concepts
-    
+
 
 def solve_for_x(LHS, RHS):
-        # solve for x in terms of other variables
+    # solve for x in terms of other variables
     if "x" in LHS["positive"]:
         for variable in LHS["positive"]:
             if variable != "x":
@@ -97,23 +102,24 @@ def solve_for_x(LHS, RHS):
         LHS["positive"], LHS["negative"] = LHS["negative"], LHS["positive"]
     else:
         raise ValueError("Equation does not contain x")
-    
+
     return LHS, RHS
+
 
 def parse_equation(equation):
     # Remove any whitespace from the equation
     equation = equation.replace(" ", "")
-    
+
     # Split the equation into left-hand side (LHS) and right-hand side (RHS)
     lhs, rhs = equation.split("=")
     if lhs[0] != "-":
         lhs = "+" + lhs
     if rhs[0] != "-":
         rhs = "+" + rhs
-    
+
     # Regular expression pattern to match operators and variables
     pattern = r"([\+\-]?)([a-zA-Z\_0-9]+)"
-    
+
     # Parse LHS
     lhs_matches = re.findall(pattern, lhs)
     LHS = {"positive": [], "negative": []}
@@ -123,7 +129,7 @@ def parse_equation(equation):
             LHS["positive"].append(variable)
         elif sign == "-":
             LHS["negative"].append(variable)
-    
+
     # Parse RHS
     rhs_matches = re.findall(pattern, rhs)
     RHS = {"positive": [], "negative": []}
@@ -133,14 +139,56 @@ def parse_equation(equation):
             RHS["positive"].append(variable)
         elif sign == "-":
             RHS["negative"].append(variable)
-    
+
     return LHS, RHS
 
 
+@stub.function()
+def find_equations(sim_threshold: int = 0.95, n: int = 1000):
+    # load concept embedding
+    print("Loading concept embeddings...")
+    with open("./embeddings/concept_glove.json") as json_file:
+        concept_vectors = json.load(json_file)
+    concept_keys = list(concept_vectors.keys())
+    concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
+
+    # pick random concepts to fill equations of the form
+    # # a - b + c = x
+
+    # randomly pick n triplets of concepts for a, b, c
+    print("Generating equations...")
+    concepts = list(concept_vectors.keys())
+    equations = []
+    for _ in range(n):
+        a, b, c = random.sample(concepts, 3)
+        equations.append(f"{a} - {b} + {c} = x")
+
+    # for each, compute similarity between x vector and all other vectors
+    print("Solving equations...")
+    good_equations = []
+    for equation in tqdm(equations):
+        concept, sim = solve_equation(
+            equation,
+            k=1,
+            concept_vectors=concept_vectors,
+            concept_values=concept_values,
+        ).popitem()
+        if sim > sim_threshold:
+            good_equations.append((equation, concept, sim))
+            print(f"Equation: {equation} | Solution: {concept} | Similarity: {sim}")
+
+    # now take the top 10% of the good equations and mutate them by
+    # # finding most similar 10 concepts to each variable
+    # # swapping it with one of those at random
+    # # adding it to the new population and recompute similarity
+
+
 def main():
-    top = component_gen("Gene_2997 = Gene_3586 + x")
-    for key, value in top.items():
-        print(key, value)
+    # top = solve_equation("Gene_2997 - Chemical_MESH_C114286 = Gene_3586 + x")
+    # for key, value in top.items():
+    #     print(key, value)
+    find_equations()
+
 
 if __name__ == "__main__":
     main()
