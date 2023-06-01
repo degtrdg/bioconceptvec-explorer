@@ -1,3 +1,7 @@
-datasets
-embeddings
+__pycache__/
+.vscode/
+datasets/
+embeddings/
+venv/
+*.bin
 notes.md
