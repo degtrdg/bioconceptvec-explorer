@@ -1,94 +1,72 @@
-import concurrent
-from concurrent.futures import ThreadPoolExecutor
+from ratelimiter import RateLimiter
+from tenacity import retry, stop_after_attempt, wait_fixed
 import pickle
 import requests
 import xml.etree.ElementTree as ET
-from threading import Semaphore, Thread, Lock
-import time
-import shelve
 import json
 from tqdm import tqdm
 from queue import Queue
+from concurrent.futures import ThreadPoolExecutor
+import concurrent.futures
+from threading import Lock
 
-# The semaphore to limit the number of simultaneous API calls
-sem = Semaphore(3)
-
-# Lock for updating the progress bar
-pbar_lock = Lock()
-
-# Queue for thread-safe progress updates
 q = Queue()
-
+pbar_lock = Lock()
 # Fetch the gene description from NCBI Entrez
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.2))
+@RateLimiter(max_calls=9, period=1)
 def fetch_entrez_gene(id):
-    time.sleep(0.33)
-    try:
-        with sem:
-            url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
-            params = {
-                "db": "gene",
-                "id": id,
-                "retmode": "json"
-            }
-            response = requests.get(url, params=params)
-            return response.json()["result"][id]["description"] if response.status_code == 200 else None
-    except Exception as e:
-        print(f"An error occurred in fetch_entrez_gene: {id}")
-        return None
+    url = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
+    params = {
+        "db": "gene",
+        "id": id,
+        "retmode": "json",
+        "api_key": "08c3e5645f832a8ef99f034c2e9dd39a7d09"
+    }
+    response = requests.get(url, params=params)
+    return response.json()["result"][id]["description"] if response.status_code == 200 else None
 
 # Fetch the disease name from MESH
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.2))
+@RateLimiter(max_calls=9, period=1)
 def fetch_mesh_descriptor(id):
-    time.sleep(0.33)
-    try:
-        with sem:
-            url = f"https://id.nlm.nih.gov/mesh/lookup/label?resource={id}"
-            headers = {"Accept": "application/json"}
-            response = requests.get(url, headers=headers)
-            if response.status_code == 200 and response.json():
-                return response.json()[0]
-            else:
-                return None
-    except Exception as e:
-        print(f"An error occurred in fetch_mesh_descriptor: {e}")
+    url = f"https://id.nlm.nih.gov/mesh/lookup/label?resource={id}"
+    headers = {"Accept": "application/json"}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200 and response.json():
+        return response.json()[0]
+    else:
         return None
 
 # Fetch the species scientific name from NCBI taxonomy
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.2))
+@RateLimiter(max_calls=9, period=1)
 def fetch_ncbi_species(id):
-    time.sleep(0.33)
-    try:
-        with sem:
-            url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=taxonomy&id={id}"
-            response = requests.get(url)
-            if response.status_code == 200:
-                root = ET.fromstring(response.content)
-                return root.find('.//Item[@Name="ScientificName"]').text
-            else:
-                return None
-    except Exception as e:
-        print(f"An error occurred in fetch_ncbi_species: {e}")
+    url = f"https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi?db=taxonomy&id={id}&api_key=08c3e5645f832a8ef99f034c2e9dd39a7d09"
+    response = requests.get(url)
+    if response.status_code == 200:
+        root = ET.fromstring(response.content)
+        return root.find('.//Item[@Name="ScientificName"]').text
+    else:
         return None
 
 # Fetch the cell line from Cellosaurus
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.2))
+@RateLimiter(max_calls=9, period=1)
 def fetch_cellosaurus(id):
-    time.sleep(0.33)
-    try:
-        with sem:
-            url = f"https://api.cellosaurus.org/cell-line/{id}"
-            response = requests.get(url)
-            if response.status_code == 200:
-                return [value['value'] for name in response.json().get('Cellosaurus', {}).get('cell-line-list', []) for value in name.get('name-list', [])]
-            else:
-                return None
-    except Exception as e:
-        print(f"An error occurred in fetch_cellosaurus: {e}")
+    url = f"https://api.cellosaurus.org/cell-line/{id}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return [value['value'] for name in response.json().get('Cellosaurus', {}).get('cell-line-list', []) for value in name.get('name-list', [])]
+    else:
         return None
 
 # Fetch the SNP from dbSNP
@@ -112,28 +90,19 @@ def parse_dbsnp(dbsnp_json):
                 for placements_with_allele in dbsnp_json["primary_snapshot_data"]["placements_with_allele"]:
                     if 'alleles' in placements_with_allele:
                         snps_list.append(placements_with_allele['alleles'])
-        # return {
-        #     "chromosome": dbsnp_json["refsnp_id"],
-        #     "snps": snps_list,
-        #     "gene": list(gene_set)
-        # }
         return list(gene_set)
     else:
         return None
 
 
+@retry(stop=stop_after_attempt(3), wait=wait_fixed(0.2))
+@RateLimiter(max_calls=9, period=1)
 def fetch_dbsnp(rs_id):
-    time.sleep(0.33)
-    try:
-        with sem:
-            url = f"https://api.ncbi.nlm.nih.gov/variation/v0/beta/refsnp/{rs_id}"
-            response = requests.get(url)
-            if response.status_code == 200:
-                return parse_dbsnp(response.json())
-            else:
-                return None
-    except Exception as e:
-        print(f"An error occurred in fetch_dbsnp: {e}")
+    url = f"https://api.ncbi.nlm.nih.gov/variation/v0/beta/refsnp/{rs_id}&api_key=08c3e5645f832a8ef99f034c2e9dd39a7d09"
+    response = requests.get(url)
+    if response.status_code == 200:
+        return parse_dbsnp(response.json())
+    else:
         return None
 
 # Fetch the concept description
@@ -164,7 +133,6 @@ def fetch_concept_description(concept_id):
             identifier = identifier[identifier.rfind('_')+1:]
             result = fetch_dbsnp(identifier)
         elif concept_type == "SNP":
-            time.sleep(0.1)
             identifier = identifier[2:]
             result = fetch_dbsnp(identifier)
         elif concept_type == "Chemical":
@@ -176,7 +144,6 @@ def fetch_concept_description(concept_id):
             result = concept_type + ' ' + identifier.replace('_', ' ')
         else:
             return None
-
         if result is None:
             return concept_type + ' ' + identifier.replace('_', ' ')
         else:
@@ -188,11 +155,10 @@ def fetch_concept_description(concept_id):
 
 
 YOUR_JSON_PATH = '/Users/danielgeorge/Documents/work/ml/bioconceptvec-explorer/bioconceptvec-explorer/embeddings/concept_glove.json'
+
 # Load concepts from JSON
 with open(YOUR_JSON_PATH) as json_file:
     concept_vectors = json.load(json_file)
-print('load', len(concept_vectors), 'concepts')
-
 # Convert keys to list for subscription
 concept_keys = list(concept_vectors.keys())
 
@@ -206,7 +172,7 @@ def update_concept_description(concept):
 
 with tqdm(total=len(concept_descriptions)) as pbar:
     # max_workers can be adjusted
-    with ThreadPoolExecutor(max_workers=50) as executor:
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {executor.submit(update_concept_description, concept)
                    for concept in concept_descriptions.keys()}
 
