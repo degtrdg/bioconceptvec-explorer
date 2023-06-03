@@ -16,163 +16,88 @@ image = modal.Image.debian_slim().pip_install_from_requirements("requirements.tx
 
 stub = modal.Stub("bioconceptvec", image=image, mounts=mounts)
 
-# load concept embedding
+# load concept embedding for all API calls
+print("Cold start - loading concept embeddings...")
 with open("./embeddings/concept_glove.json") as json_file:
     concept_vectors = json.load(json_file)
-    concept_vectors = list(concept_vectors.keys())
+    concept_keys = list(concept_vectors.keys())
+    concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
+print("Done!")
 
 
 @stub.function()
-@modal.web_endpoint(method="GET", label="solve-equation")
-def solve_equation(
-    equation: str,
+@modal.web_endpoint(method="GET")
+def compute_expression(
+    expression: str,
     k: int = 10,
-    concept_vectors: list = None,
-    concept_values: np.ndarray = None,
     useCosineSimilarity: bool = True,
 ) -> dict:
-    LHS, RHS = parse_equation(equation)
-    LHS, RHS = solve_for_x(LHS, RHS)
+    print(f"Computing expression: {expression}")
+    # remove whitespace
+    expression = expression.replace(" ", "")
+    if expression[0] != "-":
+        expression = "+" + expression
 
-    # load concept embedding
-    if concept_values is None or concept_vectors is None:
-        print("Loading concept embeddings...")
-        with open("./embeddings/concept_glove.json") as json_file:
-            concept_vectors = json.load(json_file)
-            concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
+    # regex to match operators and operands
+    pattern = r"([\+\-]?)([a-zA-Z\_0-9]+)"
+    matches = re.findall(pattern, expression)
 
     # compute x vector
     result = np.zeros(np.array(concept_values[0]).shape, dtype=np.float32)
-    if "x" in RHS["positive"]:
-        for variable in LHS["positive"]:
-            result += concept_vectors[variable]
-        for variable in LHS["negative"]:
+    for match in matches:
+        sign, variable = match
+        print(f"Variable: {variable} | Sign: {sign}")
+        if sign == "-":
             result -= concept_vectors[variable]
-    elif "x" in LHS["positive"]:
-        for variable in RHS["positive"]:
-            result -= concept_vectors[variable]
-        for variable in RHS["negative"]:
+        elif sign == "+":
             result += concept_vectors[variable]
-    else:
-        raise ValueError("Solved equation does not contain x isolated on one side")
+        else:
+            raise ValueError(f"Invalid operator: {sign}")
 
-    top_concepts = {}
     similarities = None
-
     if useCosineSimilarity:
         # compute similarity between x vector and all other vectors
         similarities = cosine_similarity(concept_values, [result]).flatten()
     else:
         # compute distance between x vector and all other vectors
-        similarities = np.linalg.norm(concept_values - result, axis=1)
+        similarities = np.linalg.norm(concept_values - result, axis=1).flatten()
 
-    # return top k most similar concepts
-    for concept, similarity in zip(concept_vectors.keys(), similarities):
-        top_concepts[concept] = similarity
+    # get index of top k similarities
+    top_k_indices = np.argpartition(similarities, -k)[-k:]
+
+    # get top k most similar concepts as a dict
+    top_concepts = {concept_keys[i]: float(similarities[i]) for i in top_k_indices}
     top_concepts = dict(
-        sorted(
-            top_concepts.items(), key=lambda item: item[1], reverse=useCosineSimilarity
-        )[:k]
+        sorted(top_concepts.items(), key=lambda item: item[1], reverse=True)
     )
-
     return top_concepts
 
 
 @stub.function()
-@modal.web_endpoint(method="GET", label="autosuggest")
-def autosuggest(query: str) -> list:
+@modal.web_endpoint(method="GET")
+def autosuggest(query: str, limit: int) -> list:
     # filter concept vectors based on whether query is a substring
-    return [concept for concept in concept_vectors if query in concept]
-
-
-def solve_for_x(LHS, RHS):
-    # solve for x in terms of other variables
-    if "x" in LHS["positive"]:
-        for variable in LHS["positive"]:
-            if variable != "x":
-                RHS["negative"].append(variable)
-        for variable in LHS["negative"]:
-            RHS["positive"].append(variable)
-        LHS["positive"] = ["x"]
-        LHS["negative"] = []
-    elif "x" in LHS["negative"]:
-        for variable in LHS["positive"]:
-            RHS["positive"].append(variable)
-        for variable in LHS["negative"]:
-            if variable != "x":
-                RHS["negative"].append(variable)
-        LHS["positive"] = ["x"]
-        LHS["negative"] = []
-        RHS["positive"], RHS["negative"] = RHS["negative"], RHS["positive"]
-    elif "x" in RHS["positive"]:
-        for variable in RHS["positive"]:
-            if variable != "x":
-                LHS["negative"].append(variable)
-        for variable in RHS["negative"]:
-            LHS["positive"].append(variable)
-        RHS["positive"] = ["x"]
-        RHS["negative"] = []
-    elif "x" in RHS["negative"]:
-        for variable in RHS["positive"]:
-            LHS["positive"].append(variable)
-        for variable in RHS["negative"]:
-            if variable != "x":
-                LHS["negative"].append(variable)
-        RHS["positive"] = ["x"]
-        RHS["negative"] = []
-        LHS["positive"], LHS["negative"] = LHS["negative"], LHS["positive"]
-    else:
-        raise ValueError("Equation does not contain x")
-
-    return LHS, RHS
-
-
-def parse_equation(equation):
-    # Remove any whitespace from the equation
-    equation = equation.replace(" ", "")
-
-    # Split the equation into left-hand side (LHS) and right-hand side (RHS)
-    lhs, rhs = equation.split("=")
-    if lhs[0] != "-":
-        lhs = "+" + lhs
-    if rhs[0] != "-":
-        rhs = "+" + rhs
-
-    # Regular expression pattern to match operators and variables
-    pattern = r"([\+\-]?)([a-zA-Z\_0-9]+)"
-
-    # Parse LHS
-    lhs_matches = re.findall(pattern, lhs)
-    LHS = {"positive": [], "negative": []}
-    for match in lhs_matches:
-        sign, variable = match
-        if sign == "+":
-            LHS["positive"].append(variable)
-        elif sign == "-":
-            LHS["negative"].append(variable)
-
-    # Parse RHS
-    rhs_matches = re.findall(pattern, rhs)
-    RHS = {"positive": [], "negative": []}
-    for match in rhs_matches:
-        sign, variable = match
-        if sign == "+":
-            RHS["positive"].append(variable)
-        elif sign == "-":
-            RHS["negative"].append(variable)
-
-    return LHS, RHS
+    query = query.lower()
+    lower_concept_vectors = map(lambda x: x.lower(), concept_vectors.keys())
+    result = [concept for concept in lower_concept_vectors if query in concept]
+    return result[:limit]
 
 
 @stub.function()
-def find_equations(sim_threshold: int = 0.95, n: int = 1000):
-    # load concept embedding
-    print("Loading concept embeddings...")
-    with open("./embeddings/concept_glove.json") as json_file:
-        concept_vectors = json.load(json_file)
-    concept_keys = list(concept_vectors.keys())
-    concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
+@modal.web_endpoint(method="GET")
+def get_similar_concepts(concept_query: str, k: int) -> list:
+    concept = concept_vectors[concept_query]
+    similarities = cosine_similarity(concept_values, [concept]).flatten()
+    top_concepts = {}
+    for concept, similarity in zip(concept_vectors.keys(), similarities):
+        top_concepts[concept] = similarity
+    top_concepts = dict(
+        sorted(top_concepts.items(), key=lambda item: item[1], reverse=True)[:k]
+    )
+    return top_concepts
 
+
+def find_equations(sim_threshold: int = 0.95, n: int = 1000):
     # pick random concepts to fill equations of the form
     # # a - b + c = x
 
@@ -182,13 +107,13 @@ def find_equations(sim_threshold: int = 0.95, n: int = 1000):
     equations = []
     for _ in range(n):
         a, b, c = random.sample(concepts, 3)
-        equations.append(f"{a} - {b} + {c} = x")
+        equations.append(f"{a} - {b} + {c}")
 
     # for each, compute similarity between x vector and all other vectors
     print("Solving equations...")
     good_equations = []
     for equation in tqdm(equations):
-        concept, sim = solve_equation(
+        concept, sim = compute_expression(
             equation,
             k=1,
             concept_vectors=concept_vectors,
@@ -196,7 +121,7 @@ def find_equations(sim_threshold: int = 0.95, n: int = 1000):
         ).popitem()
         if sim > sim_threshold:
             good_equations.append((equation, concept, sim))
-            print(f"Equation: {equation} | Solution: {concept} | Similarity: {sim}")
+            print(f"Expression: {equation} | Solution: {concept} | Similarity: {sim}")
 
     # now take the top 10% of the good equations and mutate them by
     # # finding most similar 10 concepts to each variable
@@ -205,10 +130,8 @@ def find_equations(sim_threshold: int = 0.95, n: int = 1000):
 
 
 def main():
-    # top = solve_equation("Gene_2997 - Chemical_MESH_C114286 = Gene_3586 + x")
-    # for key, value in top.items():
-    #     print(key, value)
-    find_equations()
+    print("Species_9615")
+    print(compute_expression("Gene_91624-Gene_341346", k=10))
 
 
 if __name__ == "__main__":
