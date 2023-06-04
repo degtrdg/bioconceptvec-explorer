@@ -1,139 +1,18 @@
-Loading concept embeddings...
+Cold start - loading concept embeddings...
+Done!
 Generating equations...
 Solving equations...
-Equation: Gene_91624 - Gene_341346 + Gene_4316_4318_4322 = x | Solution: Gene_91624 | Similarity: 0.9704768061637878
-Equation: Chemical_MESH_C106874 - DNAMutation_c_54C_TAG + DNAMutation_c_1615delG_RS_797044819 = x | Solution: Chemical_MESH_C106874 | Similarity: 0.971954345703125
-Equation: DNAMutation_c_5191C_A - Chemical_MESH_C526999 + Chemical_MESH_C012737 = x | Solution: Chemical_MESH_C012737 | Similarity: 0.9928519129753113
-Equation: Chemical_MESH_C517756 - ProteinMutation_p_Y428F + Disease_MESH_C562832 = x | Solution: Disease_MESH_C562832 | Similarity: 0.9763327836990356
-Equation: Chemical_MESH_D017638 - ProteinMutation_p_M274I + Chemical_MESH_C033333 = x | Solution: Chemical_MESH_D017638 | Similarity: 0.9909200668334961
-Equation: Disease_MESH_D014912 - Gene_100101409 + ProteinMutation_p_R528H_R_RS_199469636 = x | Solution: Disease_MESH_D014912 | Similarity: 0.9733860492706299
-Equation: Chemical_MESH_C530226 - Chemical_MESH_C036275 + Gene_366214 = x | Solution: Gene_366214 | Similarity: 0.9604272842407227
-Equation: Gene_84681 - Species_667516 + Gene_103093888 = x | Solution: Gene_84681 | Similarity: 0.967477560043335
-Equation: Gene_282527 - ProteinMutation_p_M377A + Chemical_MESH_C093213 = x | Solution: Gene_282527 | Similarity: 0.9765964150428772
-Equation: SNP_rs2069912 - DNAMutation_c_244C_G + CellLine_CVCL_5349 = x | Solution: CellLine_CVCL_5349 | Similarity: 0.9646114110946655
-Equation: Gene_83395 - ProteinMutation_p_P32R + Gene_494036 = x | Solution: Gene_83395 | Similarity: 0.9681069850921631
-Equation: Gene_171442 - Species_366394 + Chemical_MESH_D003366 = x | Solution: Chemical_MESH_D003366 | Similarity: 0.959539532661438
-Equation: SNP_rs875 - Gene_20194_20202 + Chemical_MESH_C011206 = x | Solution: Chemical_MESH_C011206 | Similarity: 0.9885342121124268
-Equation: Species_4112 - Disease_MESH_C536049 + Gene_106502413 = x | Solution: Species_4112 | Similarity: 0.9644901752471924
-Equation: Gene_100620242 - Gene_100752928 + Gene_313050 = x | Solution: Gene_313050 | Similarity: 0.9766911864280701
-Equation: Gene_39958 - ProteinMutation_p_N414Q + SNP_rs4264 = x | Solution: Gene_39958 | Similarity: 0.9550328254699707
-Equation: Gene_613033 - Chemical_MESH_C000594525 + ProteinMutation_p_P186V = x | Solution: Gene_613033 | Similarity: 0.9769251346588135
-Equation: Gene_100762141 - Chemical_MESH_C472565 + Disease_MESH_C566448 = x | Solution: Disease_MESH_C566448 | Similarity: 0.9544054269790649
-Equation: ProteinMutation_p_D346K - ProteinMutation_p_V143G + Disease_MESH_C562856 = x | Solution: Disease_MESH_C562856 | Similarity: 0.9544334411621094
-Equation: Gene_5638 - Gene_537889 + Gene_109905 = x | Solution: Gene_109905 | Similarity: 0.9836985468864441
-Equation: CellLine_CVCL_2088 - ProteinMutation_c_188T_K_R_A_RS_372878791 + Chemical_ISRCTN14172341 = x | Solution: CellLine_CVCL_2088 | Similarity: 0.9754633903503418
-Equation: Chemical_MESH_C519974 - Chemical_MESH_C572481 + DNAMutation_c_2210G_A_RS_267607997 = x | Solution: Chemical_MESH_C519974 | Similarity: 0.9779861569404602
-Equation: ProteinMutation_p_P222H - DNAMutation_c_605C_T_RS_767539048 + Disease_MESH_D008287 = x | Solution: Disease_MESH_D008287 | Similarity: 0.9914506673812866
-Equation: Chemical_MESH_D005297 - DNAMutation_c_736C_T_RS_267607587_771703754 + Chemical_MESH_C492427 = x | Solution: Chemical_MESH_D005297 | Similarity: 0.9912052750587463
-Equation: ProteinMutation_p_R400L_RS_776095655 - Gene_224997 + Disease_MESH_C566795 = x | Solution: Disease_MESH_C566795 | Similarity: 0.9509308338165283
-Equation: Chemical_MESH_C023665 - Chemical_MESH_C022128 + Chemical_MESH_C451561 = x | Solution: Chemical_MESH_C023665 | Similarity: 0.9597983360290527
-Equation: Species_3343 - ProteinMutation_p_T409M + Chemical_MESH_C000594632 = x | Solution: Species_3343 | Similarity: 0.9524322152137756
-Equation: Disease_MESH_C537153 - ProteinMutation_p_Y284L + Chemical_butyricin_7423 = x | Solution: Disease_MESH_C537153 | Similarity: 0.9625817537307739
-Equation: ProteinMutation_p_D692A - ProteinMutation_c_77N_G + Gene_10721 = x | Solution: Gene_10721 | Similarity: 0.9837373495101929
-Equation: Chemical_MESH_C116941 - Chemical_MESH_C438032 + Chemical_MESH_C062127 = x | Solution: Chemical_MESH_C062127 | Similarity: 0.9776270389556885
-Equation: Gene_55972 - ProteinMutation_p_R742A + SNP_rs4833248 = x | Solution: Gene_55972 | Similarity: 0.9512107968330383
-Equation: ProteinMutation_p_V202L - Gene_542073 + Disease_MESH_D020936 = x | Solution: Disease_MESH_D020936 | Similarity: 0.9857749342918396
-Equation: Chemical_MESH_C515112 - SNP_rs2227501 + Gene_378427_619405 = x | Solution: Chemical_MESH_C515112 | Similarity: 0.9851013422012329
-Equation: Gene_101094399 - Chemical_MESH_C113058 + SNP_rs707954 = x | Solution: Gene_101094399 | Similarity: 0.958153247833252
-Equation: ProteinMutation_p_Y1003F - Gene_424888 + Gene_5266 = x | Solution: Gene_5266 | Similarity: 0.9509948492050171
-Equation: Chemical_MESH_D047029 - SNP_rs1813443 + Gene_101745172 = x | Solution: Chemical_MESH_D047029 | Similarity: 0.9681274890899658
-Equation: Chemical_MESH_C009618 - Chemical_MESH_C553286 + ProteinMutation_p_R80Q_RS_1799904 = x | Solution: Chemical_MESH_C009618 | Similarity: 0.9710044860839844
-Equation: Gene_80736 - Chemical_MESH_C411123 + ProteinMutation_p_D269G = x | Solution: Gene_80736 | Similarity: 0.9641903638839722
-Equation: DNAMutation_c_1316G_A_RS_756467921 - ProteinMutation_p_L127P + Chemical_MESH_C063155 = x | Solution: Chemical_MESH_C063155 | Similarity: 0.9611542224884033
-Equation: Gene_101256737 - Gene_829651 + Chemical_MESH_C409045 = x | Solution: Chemical_MESH_C409045 | Similarity: 0.9663240313529968
-Equation: Species_9913 - Gene_29382 + DNAMutation_c_TTG_TTC = x | Solution: Species_9913 | Similarity: 0.9551205635070801
-Equation: Disease_OMIM_157600 - SNP_rs28757218 + Gene_886037 = x | Solution: Disease_OMIM_157600 | Similarity: 0.971657395362854
-Equation: Gene_178547 - ProteinMutation_p_S355T + Chemical_MESH_C522671 = x | Solution: Gene_178547 | Similarity: 0.9777039289474487
-Equation: Gene_170729 - Chemical_MESH_C544845 + Chemical_MESH_C015568 = x | Solution: Chemical_MESH_C015568 | Similarity: 0.9733127355575562
-Equation: Gene_382221 - Gene_100283277 + Chemical_MESH_C050015 = x | Solution: Chemical_MESH_C050015 | Similarity: 0.9549906253814697
-Equation: Chemical_MESH_C054910 - Gene_945837 + Gene_170512 = x | Solution: Chemical_MESH_C054910 | Similarity: 0.9590555429458618
-Equation: ProteinMutation_p_H330LfsX2 - Species_146133 + Gene_282691 = x | Solution: Gene_282691 | Similarity: 0.9724940061569214
-Equation: Chemical_MESH_C495073 - DNAMutation_c_889_11G_A + Species_37623 = x | Solution: Species_37623 | Similarity: 0.9559199810028076
-Equation: Gene_84653 - Chemical_MESH_C095757 + Gene_100147721 = x | Solution: Gene_84653 | Similarity: 0.9723659753799438
-Equation: Chemical_MESH_C588070 - ProteinMutation_p_R643X_RS_121917709 + Chemical_MESH_C030002 = x | Solution: Chemical_MESH_C030002 | Similarity: 0.9765342473983765
-Equation: ProteinMutation_c_790T_M_RS_121434569 - DNAMutation_c_1T_C_CorrespondingSpecies_4530 + Chemical_MESH_C029671 = x | Solution: Chemical_MESH_C029671 | Similarity: 0.9631088972091675
-Equation: Chemical_MESH_C043464 - SNP_rs3213801 + Chemical_MESH_C539062 = x | Solution: Chemical_MESH_C043464 | Similarity: 0.9799432158470154
-Equation: Chemical_MESH_C062258 - Chemical_MESH_C541084 + SNP_rs25925 = x | Solution: Chemical_MESH_C062258 | Similarity: 0.970468282699585
-Equation: SNP_rs10917670 - Chemical_MESH_C041302 + Gene_106503207 = x | Solution: Gene_106503207 | Similarity: 0.9545143842697144
-Equation: Chemical_MESH_C066116 - Gene_100271904 + Gene_100752789 = x | Solution: Chemical_MESH_C066116 | Similarity: 0.9786248803138733
-Equation: ProteinMutation_p_L692P - DNAMutation_c_2767_2767delT + Gene_792692 = x | Solution: Gene_792692 | Similarity: 0.9599494338035583
-Equation: Chemical_MESH_C038604 - ProteinMutation_p_D282R + Chemical_MESH_C076129 = x | Solution: Chemical_MESH_C038604 | Similarity: 0.9503066539764404
-Equation: ProteinMutation_p_T459R - Chemical_MESH_C061866 + Gene_838946 = x | Solution: Gene_838946 | Similarity: 0.982804536819458
-Equation: Disease_MESH_C535701 - Chemical_LXY7824 + ProteinMutation_p_K426R = x | Solution: Disease_MESH_C535701 | Similarity: 0.9776516556739807
-Equation: Gene_31293 - ProteinMutation_p_P226S + ProteinMutation_p_A82S = x | Solution: Gene_31293 | Similarity: 0.962864339351654
-Equation: Gene_43751 - Gene_100194815 + SNP_rs3787430 = x | Solution: Gene_43751 | Similarity: 0.9800413250923157
-Equation: Gene_100314086 - Gene_18158_18160 + Gene_6453 = x | Solution: Gene_6453 | Similarity: 0.9723195433616638
-Equation: Chemical_MESH_C098874 - DNAMutation_c_908_918delinsGCA + SNP_rs1968905 = x | Solution: Chemical_MESH_C098874 | Similarity: 0.9707232713699341
-Equation: Chemical_MESH_C407242 - Gene_100183522 + ProteinMutation_p_R_916K = x | Solution: Chemical_MESH_C407242 | Similarity: 0.9534041881561279
-Equation: Gene_63935 - ProteinMutation_c_25C_S + SNP_rs1202874 = x | Solution: Gene_63935 | Similarity: 0.9636344313621521
-Equation: CellLine_CVCL_8964 - Chemical_MESH_C093985 + ProteinMutation_p_Q697E = x | Solution: CellLine_CVCL_8964 | Similarity: 0.9818027019500732
-Equation: Chemical_MESH_C076097 - ProteinMutation_p_N136S + Gene_3190258 = x | Solution: Chemical_MESH_C076097 | Similarity: 0.9795910120010376
-Equation: Disease_MESH_D016603 - Chemical_MESH_C482073 + Gene_5731_5734 = x | Solution: Disease_MESH_D016603 | Similarity: 0.9708653092384338
-Equation: Gene_16833876 - Gene_7095393 + Chemical_MESH_C022799 = x | Solution: Chemical_MESH_C022799 | Similarity: 0.9859007596969604
-Equation: ProteinMutation_p_F972A - ProteinMutation_p_I936F_CorrespondingSpecies_79782 + Chemical_MESH_C000598182 = x | Solution: Chemical_MESH_C000598182 | Similarity: 0.9880027174949646
-Equation: Gene_303496 - ProteinMutation_p_691del + Gene_8774 = x | Solution: Gene_8774 | Similarity: 0.9838522672653198
-Equation: Gene_100337421 - DNAMutation_c_1896C_T + Gene_1120 = x | Solution: Gene_1120 | Similarity: 0.973556399345398
-Equation: Chemical_MESH_C047629 - Gene_422004 + Gene_101795384 = x | Solution: Chemical_MESH_C047629 | Similarity: 0.9603763818740845
-Equation: Disease_MESH_C535741 - ProteinMutation_p_D264E + DNAMutation_c_1502_1G_T = x | Solution: Disease_MESH_C535741 | Similarity: 0.9623046517372131
-Equation: Chemical_MESH_D008784 - SNP_rs1061248 + DNAMutation_c_851_33T_A_RS_80356674 = x | Solution: Chemical_MESH_D008784 | Similarity: 0.9903556704521179
-Equation: ProteinMutation_p_C308R - Chemical_MESH_C576631 + SNP_rs3802842 = x | Solution: SNP_rs3802842 | Similarity: 0.9560747146606445
-Equation: Chemical_MESH_C516240 - DNAMutation_c_2500T_C + SNP_rs116697954 = x | Solution: Chemical_MESH_C516240 | Similarity: 0.954779326915741
-Equation: Chemical_MESH_C118288 - ProteinMutation_p_G993fsX3 + Gene_380916 = x | Solution: Chemical_MESH_C118288 | Similarity: 0.9545904994010925
-Equation: Gene_826559 - Gene_107424 + Species_1766 = x | Solution: Species_1766 | Similarity: 0.9680124521255493
-Equation: Gene_7157 - Gene_289546 + ProteinMutation_p_L31M_V_F_RS_138893424_201680991 = x | Solution: Gene_7157 | Similarity: 0.9721905589103699
-Equation: Species_112179 - Gene_40201_7249 + SNP_rs822395 = x | Solution: SNP_rs822395 | Similarity: 0.9568835496902466
-Equation: Chemical_MESH_D008785 - DNAMutation_c_45G_A_RS_56378321 + Gene_499964 = x | Solution: Chemical_MESH_D008785 | Similarity: 0.9626220464706421
-Equation: Chemical_MESH_C427923 - DNAMutation_c_C_T_RS_2227982 + Gene_239273 = x | Solution: Gene_239273 | Similarity: 0.9743832349777222
-Equation: Chemical_MESH_C495051 - Chemical_MESH_C119628 + Disease_MESH_C538682 = x | Solution: Disease_MESH_C538682 | Similarity: 0.9558250904083252
-Equation: Chemical_MESH_C401325 - Species_35770 + Gene_346673 = x | Solution: Gene_346673 | Similarity: 0.9710432291030884
-Equation: ProteinMutation_p_D563Y - SNP_rs3821104 + DNAMutation_c_102C_T = x | Solution: DNAMutation_c_102C_T | Similarity: 0.9536385536193848
-Equation: Gene_853452 - Species_1432658 + Chemical_MESH_C092074 = x | Solution: Gene_853452 | Similarity: 0.9813964366912842
-Equation: ProteinMutation_p_K313M_RS_145867327 - Chemical_MESH_C431125 + Species_43263 = x | Solution: Species_43263 | Similarity: 0.9888954162597656
-Equation: DNAMutation_c_1905C_A - DNAMutation_c_2422T_C + Gene_8526 = x | Solution: Gene_8526 | Similarity: 0.9513810873031616
-Equation: Gene_57545 - Gene_6037_8288 + Chemical_MESH_C402022 = x | Solution: Gene_57545 | Similarity: 0.9852213263511658
-Equation: Gene_2938_2940_2944_2950 - DNAMutation_c_351_352insCATATAACATAG + Gene_100125345 = x | Solution: Gene_100125345 | Similarity: 0.9523054957389832
-Equation: DNAMutation_c_704AGT_C - DNAMutation_c_1538G_A_RS_760358503 + Chemical_MESH_D019016 = x | Solution: Chemical_MESH_D019016 | Similarity: 0.9594122171401978
-Equation: Species_76517 - Gene_106422131 + Gene_854412 = x | Solution: Species_76517 | Similarity: 0.98183274269104
-Equation: Gene_11504_240913_108153 - DNAMutation_c_74G_C_RS_1800470 + Species_66527 = x | Solution: Species_66527 | Similarity: 0.959130048751831
-Equation: Gene_84390_114244_114245 - ProteinMutation_p_L1341P_RS_757917335 + Species_2234 = x | Solution: Species_2234 | Similarity: 0.9772570133209229
-Equation: Chemical_MESH_C491990 - Gene_16011_16012 + Gene_23547 = x | Solution: Gene_23547 | Similarity: 0.9641815423965454
-Equation: Gene_100124488 - Gene_680671 + Gene_396 = x | Solution: Gene_396 | Similarity: 0.9530582427978516
-Equation: Gene_101221077 - Chemical_MESH_C058130 + Gene_27163 = x | Solution: Gene_27163 | Similarity: 0.9626331925392151
-Equation: Gene_34007 - ProteinMutation_p_S203A_RS_149432620 + Chemical_MESH_C011432 = x | Solution: Gene_34007 | Similarity: 0.9793561100959778
-Equation: Gene_542417 - Gene_2870_26385 + Chemical_MESH_D000475 = x | Solution: Chemical_MESH_D000475 | Similarity: 0.9661746621131897
-Equation: ProteinMutation_p_R688Q_RS_12960 - DNAMutation_c_IVS4_212C_G + Gene_397441 = x | Solution: Gene_397441 | Similarity: 0.9658547639846802
-Equation: DNAMutation_c_179_25A_G_RS_760689221 - ProteinMutation_p_R371Q + Gene_7586 = x | Solution: Gene_7586 | Similarity: 0.988309919834137
-Equation: Chemical_MESH_C549997 - ProteinMutation_p_V367A + Chemical_MESH_D008294 = x | Solution: Chemical_MESH_D008294 | Similarity: 0.9670693278312683
-Equation: Gene_504193 - SNP_rs6788787 + Chemical_MESH_C434043 = x | Solution: Chemical_MESH_C434043 | Similarity: 0.9543876051902771
-Equation: Gene_3553_3565_3569 - SNP_rs2742624 + Gene_281193 = x | Solution: Gene_281193 | Similarity: 0.9889898896217346
-Equation: ProteinMutation_p_R213K - Gene_1749_1750 + Chemical_MESH_C022022 = x | Solution: Chemical_MESH_C022022 | Similarity: 0.9647523164749146
-Equation: ProteinMutation_p_Q57L - Species_492032 + Disease_MESH_D001763 = x | Solution: Disease_MESH_D001763 | Similarity: 0.9793441295623779
-Equation: ProteinMutation_p_L66H - ProteinMutation_p_M73T + Gene_433938 = x | Solution: Gene_433938 | Similarity: 0.9621968269348145
-Equation: Chemical_MESH_C540739 - Gene_102146205 + Gene_854068 = x | Solution: Gene_854068 | Similarity: 0.9733240604400635
-Equation: ProteinMutation_p_HF - Gene_27092 + Species_71139 = x | Solution: Species_71139 | Similarity: 0.9624829292297363
-Equation: Gene_2869 - Gene_105606468 + Chemical_MESH_C473618 = x | Solution: Gene_2869 | Similarity: 0.9625028371810913
-Equation: Chemical_MESH_C041139 - Gene_680210 + DNAMutation_c_169G_T = x | Solution: Chemical_MESH_C041139 | Similarity: 0.9654892683029175
-Equation: Disease_MESH_D011565 - ProteinMutation_p_I43N + Gene_100773687 = x | Solution: Disease_MESH_D011565 | Similarity: 0.9832359552383423
-Equation: Chemical_MESH_C031684 - Gene_107779725 + Chemical_MESH_C585674 = x | Solution: Chemical_MESH_C031684 | Similarity: 0.9570683836936951
-Equation: Gene_403680 - ProteinMutation_p_S215G_RS_587781858 + Disease_MESH_D004241 = x | Solution: Disease_MESH_D004241 | Similarity: 0.9728087782859802
-Equation: Gene_146713 - ProteinMutation_p_V39M_RS_80358261 + Chemical_MESH_C012568 = x | Solution: Gene_146713 | Similarity: 0.9741679430007935
-Equation: SNP_rs2307240 - Gene_10312_28898 + Chemical_MESH_C447720 = x | Solution: Chemical_MESH_C447720 | Similarity: 0.9749199151992798
-Equation: Gene_613123 - ProteinMutation_p_A434E + Disease_MESH_D014823 = x | Solution: Disease_MESH_D014823 | Similarity: 0.9916976094245911
-Equation: Chemical_MESH_C084439 - ProteinMutation_p_R1008X + Chemical_MESH_C064838 = x | Solution: Chemical_MESH_C084439 | Similarity: 0.9789453744888306
-Equation: Gene_58800 - Chemical_MESH_C404945 + ProteinMutation_p_W24_CorrespondingGene_2706 = x | Solution: Gene_58800 | Similarity: 0.9856300354003906
-Equation: Gene_64545 - Chemical_MESH_C074929 + Chemical_MESH_C104514 = x | Solution: Gene_64545 | Similarity: 0.9753569960594177
-Equation: Chemical_MESH_C434317 - Chemical_MESH_C539278 + Chemical_MESH_C051835 = x | Solution: Chemical_MESH_C434317 | Similarity: 0.9524763822555542
-Equation: CellLine_CVCL_5093 - SNP_rs2850146 + Chemical_MESH_C005197 = x | Solution: Chemical_MESH_C005197 | Similarity: 0.9694312810897827
-Equation: Gene_17242 - SNP_rs1476679 + DNAMutation_c_610G_A_RS_387907231 = x | Solution: Gene_17242 | Similarity: 0.9689509868621826
-Equation: Chemical_MESH_D004744 - Gene_84283 + Gene_100314033 = x | Solution: Chemical_MESH_D004744 | Similarity: 0.963183581829071
-Equation: Chemical_MESH_D008674 - Chemical_MESH_C090302 + Gene_26523_23405_29102 = x | Solution: Chemical_MESH_D008674 | Similarity: 0.9797078371047974
-Equation: Chemical_MESH_C572059 - Gene_107840295 + Chemical_MESH_C029676 = x | Solution: Chemical_MESH_C029676 | Similarity: 0.9583462476730347
-Equation: Chemical_MESH_C000588704 - ProteinMutation_p_K101E_CorrespondingSpecies_10239 + Species_49198 = x | Solution: Species_49198 | Similarity: 0.9719846248626709
-Equation: DNAMutation_c_del12_CorrespondingGene_820387 - SNP_rs4934282 + Gene_3980 = x | Solution: Gene_3980 | Similarity: 0.9833133220672607
-Equation: Gene_840_6311 - SNP_rs12310367 + Gene_37867 = x | Solution: Gene_37867 | Similarity: 0.9776976704597473
-Equation: ProteinMutation_p_V87L - ProteinMutation_p_Y47T + Gene_852825 = x | Solution: Gene_852825 | Similarity: 0.9877339601516724
-Equation: Chemical_MESH_C059394 - Chemical_MESH_C587979 + Chemical__4_AP20187 = x | Solution: Chemical_MESH_C059394 | Similarity: 0.9671396017074585
-Equation: Chemical_MESH_C039995 - Chemical_MESH_C541201 + Chemical_MESH_C541190 = x | Solution: Chemical_MESH_C039995 | Similarity: 0.9573379755020142
-Equation: Species_72446 - Chemical_MESH_C014863 + Chemical_MESH_C106129 = x | Solution: Species_72446 | Similarity: 0.9790939092636108
-Equation: Chemical_MESH_C071262 - Chemical_MESH_C000588636 + Gene_819320 = x | Solution: Chemical_MESH_C071262 | Similarity: 0.976969838142395
-Equation: Chemical_MESH_C492324 - Gene_20834446 + Chemical_MESH_C533686 = x | Solution: Chemical_MESH_C492324 | Similarity: 0.9698190689086914
+Expression: Gene_6406_29106 - SNP_rs34886328 + Gene_100628162 | Solution: Chemical_MESH_C104804 | Similarity: 0.8048298358917236
+Expression: SNP_rs12208888 - ProteinMutation_p_F194Y + Gene_818533 | Solution: Chemical_MESH_C582233 | Similarity: 0.7965010404586792
+Expression: ProteinMutation_p_G204S_RS_104894173 - Gene_835_840_842 + Chemical_MESH_C034706 | Solution: ProteinMutation_p_H316V | Similarity: 0.8085697889328003
+Expression: ProteinMutation_p_G44S - Chemical_MESH_C587588 + Gene_107_108_109_196883_111_112_113_114_115 | Solution: DNAMutation_g_12804T_C | Similarity: 0.7596518993377686
+Expression: ProteinMutation_p_E53K_RS_863224013 - ProteinMutation_p_C307S + Species_38736 | Solution: ProteinMutation_p_C352Y_RS_193922566 | Similarity: 0.7632861137390137
+Expression: ProteinMutation_p_R199Q_RS_200850756 - Chemical_MESH_C000334 + Gene_492771 | Solution: SNP_rs2284018 | Similarity: 0.8110538721084595
+Expression: ProteinMutation_p_H75W - SNP_rs139012426 + ProteinMutation_p_E345R | Solution: ProteinMutation_p_T213M | Similarity: 0.7513421773910522
+Expression: ProteinMutation_p_W13G_RS_139548132 - Gene_110834_18518 + Chemical_MESH_C473631 | Solution: DNAMutation_c_544G_A | Similarity: 0.7720743417739868
+Expression: DNAMutation_g_14206C_T - Chemical_MESH_C070377 + Chemical_MESH_C083387 | Solution: ProteinMutation_p_D708G | Similarity: 0.7573469877243042
+Expression: Gene_66125 - Gene_24974 + Chemical_MESH_C115212 | Solution: ProteinMutation_p_C228G | Similarity: 0.7569252848625183
+Expression: Gene_6561_26266 - Gene_397852 + DNAMutation_c_456C_T | Solution: ProteinMutation_p_E260D_RS_536638039 | Similarity: 0.7781540155410767
+Expression: Gene_482071 - ProteinMutation_p_S430C + SNP_rs111033253 | Solution: DNAMutation_c_T_C_RS_2242245 | Similarity: 0.7670618295669556
+Expression: ProteinMutation_c_457_458insG - Chemical_MESH_C000598870 + Gene_304388_65129_65131 | Solution: DNAMutation_c_C_T_RS_2069718 | Similarity: 0.7531883120536804
+Expression: ProteinMutation_p_R229Q_RS_2278911 - Gene_613729 + ProteinMutation_p_D568A | Solution: SNP_rs876174537 | Similarity: 0.7815011739730835

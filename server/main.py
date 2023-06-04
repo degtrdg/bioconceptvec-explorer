@@ -1,3 +1,8 @@
+import time
+import openai
+from utils import load_openai_key
+import pandas as pd
+import pickle
 import random
 from tqdm import tqdm
 import numpy as np
@@ -8,13 +13,50 @@ import modal
 from fastapi import FastAPI
 from sklearn.metrics.pairwise import cosine_similarity
 
+
+def get_prompt(query: str):
+    return f"""
+        What does this mean analogically? I found this by doing equations with vector embeddings.
+        This is similar to how King - Man + Woman = Queen for word2vec. I'm trying to reason why this makes sense.
+
+        {query}
+
+        Really try to think outside the box to find why this could be reasonable. Use this as a generative way to help think of biological hypotheses.
+        """
+
+
 mounts = [
     modal.Mount.from_local_dir("./embeddings/", remote_path="/root/embeddings/"),
+    modal.Mount.from_local_dir("./mappings/", remote_path="/root/mappings/"),
+    modal.Mount.from_local_file("./utils.py", remote_path="/root/utils.py"),
 ]
 
 image = modal.Image.debian_slim().pip_install_from_requirements("requirements.txt")
 
 stub = modal.Stub("bioconceptvec", image=image, mounts=mounts)
+
+
+def gpt(prompt):
+    load_openai_key("./.env")
+    messageList = [
+        {
+            "role": "system",
+            "content": "You are a helpful chatbot that helps people understand biology.",
+        },
+        {
+            "role": "user",
+            "content": prompt,
+        },
+    ]
+
+    completion = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo", messages=messageList
+    )
+
+    feature_string = completion.choices[0].message.content
+
+    return feature_string
+
 
 # load concept embedding for all API calls
 print("Cold start - loading concept embeddings...")
@@ -22,31 +64,41 @@ with open("./embeddings/concept_glove.json") as json_file:
     concept_vectors = json.load(json_file)
     concept_keys = list(concept_vectors.keys())
     concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
+
+print("loading concept descriptions...")
+with open("./mappings/concept_descriptions.pkl", "rb") as f:
+    concept_descriptions = pickle.load(f)
+    rev_concept_descriptions = {}
+    for key, value in tqdm(concept_descriptions.items()):
+        if type(value) == list and len(value) == 0:
+            continue
+        elif type(value) == list and len(value) > 0:
+            rev_concept_descriptions[value[0]] = key
+        else:
+            rev_concept_descriptions[value] = key
+
 print("Done!")
 
 
 @stub.function()
 @modal.web_endpoint(method="GET")
 def compute_expression(
-    expression: str,
+    expression: list,
     k: int = 10,
     useCosineSimilarity: bool = True,
 ) -> dict:
-    print(f"Computing expression: {expression}")
-    # remove whitespace
-    expression = expression.replace(" ", "")
-    if expression[0] != "-":
-        expression = "+" + expression
+    # print(f"Computing expression: {expression}")
 
-    # regex to match operators and operands
-    pattern = r"([\+\-]?)([a-zA-Z\_0-9]+)"
-    matches = re.findall(pattern, expression)
+    if expression[0] != "-" and expression[0] != "+":
+        expression = ["+", *expression]
 
+    # split expression into groups of 2 (sign, concept)
+    matches = [expression[i : i + 2] for i in range(0, len(expression), 2)]
     # compute x vector
     result = np.zeros(np.array(concept_values[0]).shape, dtype=np.float32)
     for match in matches:
         sign, variable = match
-        print(f"Variable: {variable} | Sign: {sign}")
+        # print(f"Variable: {variable} | Sign: {sign}")
         if sign == "-":
             result -= concept_vectors[variable]
         elif sign == "+":
@@ -78,14 +130,26 @@ def compute_expression(
 def autosuggest(query: str, limit: int) -> list:
     # filter concept vectors based on whether query is a substring
     query = query.lower()
-    lower_concept_vectors = map(lambda x: x.lower(), concept_vectors.keys())
-    result = [concept for concept in lower_concept_vectors if query in concept]
+    descs = list(concept_descriptions.values())
+    for i in range(len(descs)):
+        if type(descs[i]) == list and len(descs[i]) > 0:
+            descs[i] = descs[i][0]
+        elif type(descs[i]) == list and len(descs[i]) == 0:
+            descs[i] = ""
+
+    descs = [i for i in descs if i is not None and i != ""]
+    lower_concept_descs = map(lambda x: x.lower(), descs)
+    result = [concept for concept in lower_concept_descs if query in concept]
     return result[:limit]
 
 
 @stub.function()
 @modal.web_endpoint(method="GET")
 def get_similar_concepts(concept_query: str, k: int) -> list:
+    # convert from concept description to concept id
+    if ";" in concept_query:
+        concept_query = concept_query.split(";")[0]
+    concept_query = rev_concept_descriptions[concept_query]
     concept = concept_vectors[concept_query]
     similarities = cosine_similarity(concept_values, [concept]).flatten()
     top_concepts = {}
@@ -97,41 +161,66 @@ def get_similar_concepts(concept_query: str, k: int) -> list:
     return top_concepts
 
 
-def find_equations(sim_threshold: int = 0.95, n: int = 1000):
-    # pick random concepts to fill equations of the form
-    # # a - b + c = x
+@stub.function()
+@modal.web_endpoint(method="GET")
+def free_var_search(term: str, sim_threshold=0.7, n=100, use_gpt=False):
+    term_vec = concept_vectors[term]
+    expressions = []
 
-    # randomly pick n triplets of concepts for a, b, c
-    print("Generating equations...")
+    # randomly pick 1000 pairs of concepts for b, c
     concepts = list(concept_vectors.keys())
     equations = []
     for _ in range(n):
-        a, b, c = random.sample(concepts, 3)
-        equations.append(f"{a} - {b} + {c}")
+        b, c = random.sample(concepts, 2)
+        equations.append([term, "+", b, "-", c])
 
-    # for each, compute similarity between x vector and all other vectors
     print("Solving equations...")
     good_equations = []
     for equation in tqdm(equations):
         concept, sim = compute_expression(
             equation,
             k=1,
-            concept_vectors=concept_vectors,
-            concept_values=concept_values,
         ).popitem()
-        if sim > sim_threshold:
+        if sim > sim_threshold and concept not in equation:
+            print(f"Equation: {equation} | Concept: {concept} | Similarity: {sim}")
             good_equations.append((equation, concept, sim))
-            print(f"Expression: {equation} | Solution: {concept} | Similarity: {sim}")
+    df = pd.DataFrame(good_equations, columns=["Equation", "Concept", "Similarity"])
+    eq_mapped = []
+    for row in good_equations:
+        eq_mapped.append(
+            " ".join(
+                [str(concept_descriptions[i]) for i in row[0] if i != "+" and i != "-"]
+            )
+        )
+    df["Equation_mapped"] = eq_mapped
+    df["Concept Description"] = df["Concept"].apply(lambda x: concept_descriptions[x])
 
-    # now take the top 10% of the good equations and mutate them by
-    # # finding most similar 10 concepts to each variable
-    # # swapping it with one of those at random
-    # # adding it to the new population and recompute similarity
+    # now we use gpt to generate a rationale for each equation using the prompt
+    if use_gpt:
+        rationales = []
+        for row in tqdm(df.iterrows()):
+            mapped_eq = row[1]["Equation_mapped"]
+            prompt = get_prompt(mapped_eq)
+            rationales.append(gpt(prompt))
+            time.sleep(0.5)
+
+        df["Rationale"] = rationales
+    df.to_csv("results.csv", index=False)
+
+    return df
+
+
+@stub.function()
+@modal.web_endpoint(method="GET")
+def heartbeat():
+    return "OK"
 
 
 def main():
-    print("Species_9615")
-    print(compute_expression("Gene_91624-Gene_341346", k=10))
+    # print(
+    #     compute_expression(["2-iodobenzylguanidine", "+", "adrenoceptor beta 1"], k=10)
+    # )
+    free_var_search("Gene_6406_29106")
 
 
 if __name__ == "__main__":
