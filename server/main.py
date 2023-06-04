@@ -44,6 +44,7 @@ mounts = [
     modal.Mount.from_local_dir("./embeddings/", remote_path="/root/embeddings/"),
     modal.Mount.from_local_dir("./mappings/", remote_path="/root/mappings/"),
     modal.Mount.from_local_file("./utils.py", remote_path="/root/utils.py"),
+    modal.Mount.from_local_file("./.env", remote_path="/root/.env"),
 ]
 
 image = modal.Image.debian_slim().pip_install_from_requirements("requirements.txt")
