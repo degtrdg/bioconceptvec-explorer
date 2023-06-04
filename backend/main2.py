@@ -4,13 +4,36 @@ import faiss
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 
+# Load concept_descriptions function
+
+
+@st.cache_data
+def load_concept_descriptions():
+    concept_descriptions = pd.read_pickle(
+        '/Users/danielgeorge/Documents/work/ml/bioconceptvec-explorer/bioconceptvec-explorer/mappings/concept_descriptions.pkl')
+    return concept_descriptions
+# Load sentence_embeddings function
+
+
+@st.cache_data
+def load_sentence_embeddings():
+    sentence_embeddings = np.load(
+        '/Users/danielgeorge/Documents/work/ml/bioconceptvec-explorer/bioconceptvec-explorer/mappings/description_embeddings.npy')
+    return sentence_embeddings
+# Load sentences function
+
+
+@st.cache_data
+def load_sentences():
+    with open('/Users/danielgeorge/Documents/work/ml/bioconceptvec-explorer/bioconceptvec-explorer/notebooks/sentences.txt') as f:
+        sentences = f.readlines()
+    return sentences
+
+
 # Load the necessary data
-concept_descriptions = pd.read_pickle(
-    '/Users/danielgeorge/Documents/work/ml/bioconceptvec-explorer/bioconceptvec-explorer/mappings/concept_descriptions.pkl')
-sentence_embeddings = np.load(
-    '/Users/danielgeorge/Documents/work/ml/bioconceptvec-explorer/bioconceptvec-explorer/mappings/description_embeddings.npy')
-with open('/Users/danielgeorge/Documents/work/ml/bioconceptvec-explorer/bioconceptvec-explorer/notebooks/sentences.txt') as f:
-    sentences = f.readlines()
+concept_descriptions = load_concept_descriptions()
+sentence_embeddings = load_sentence_embeddings()
+sentences = load_sentences()
 
 # Load the model
 model = SentenceTransformer('bert-base-nli-mean-tokens')
