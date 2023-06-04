@@ -5,3 +5,4 @@ embeddings/
 venv/
 *.bin
 notes.md
+.env
