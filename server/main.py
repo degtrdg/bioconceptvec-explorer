@@ -1,6 +1,5 @@
 import time
 import openai
-from utils import load_openai_key
 import pandas as pd
 import pickle
 import random
@@ -12,6 +11,22 @@ import json
 import modal
 from fastapi import FastAPI
 from sklearn.metrics.pairwise import cosine_similarity
+
+import os
+import json
+import openai
+import dotenv
+
+
+def load_openai_key(path):
+    dotenv.load_dotenv(path)
+    openai.api_key = os.getenv("OPENAI_API_KEY")
+
+
+def build_messages_from_file(path, prompt):
+    messages = json.load(open(path, "r"))
+    messages.append({"role": "user", "content": prompt})
+    return messages
 
 
 def get_prompt(query: str):
