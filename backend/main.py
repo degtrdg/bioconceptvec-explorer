@@ -1,35 +1,110 @@
-from enum import Enum
-from fastapi import FastAPI
+import streamlit as st
+import SessionState  # Assuming SessionState.py is in your working directory
+import json
+import numpy as np
+import re
+from sklearn.metrics.pairwise import cosine_similarity
 
-app = FastAPI() # create FastAPI instance
+# load concept embedding for all API calls
+st.write("Cold start - loading concept embeddings...")
+with open("../embeddings/concept_glove.json") as json_file:
+    concept_vectors = json.load(json_file)
+    concept_keys = list(concept_vectors.keys())
+    concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
+st.write("Done!")
 
-class ModelName(str, Enum):
-    alexnet = "alexnet"
-    resnet = "resnet"
-    lenet = "lenet"
+def compute_expression(expression: str, k: int = 10, useCosineSimilarity: bool = True) -> dict:
+    # remove whitespace
+    expression = expression.replace(" ", "")
+    if expression[0] != "-":
+        expression = "+" + expression
 
-@app.get("/") # decorator to define path operation. Path: /. HTTP method: GET
-async def root(): # function of what is executed when the path operation is requested
-    return {"message": "Hello World"} # return content of the response
+    # regex to match operators and operands
+    pattern = r"([\+\-]?)([a-zA-Z\_0-9]+)"
+    matches = re.findall(pattern, expression)
 
-@app.get("/items/{item_id}")
-async def read_item(item_id: int):
-    return {"item_id": item_id}
+    # compute x vector
+    result = np.zeros(np.array(concept_values[0]).shape, dtype=np.float32)
+    for match in matches:
+        sign, variable = match
+        st.write(f"Variable: {variable} | Sign: {sign}")
+        if sign == "-":
+            result -= concept_vectors[variable]
+        elif sign == "+":
+            result += concept_vectors[variable]
+        else:
+            raise ValueError(f"Invalid operator: {sign}")
 
-@app.get("/users/me")
-async def read_user_me():
-    return {"user_id": "the current user"}
+    similarities = None
+    if useCosineSimilarity:
+        # compute similarity between x vector and all other vectors
+        similarities = cosine_similarity(concept_values, [result]).flatten()
+    else:
+        # compute distance between x vector and all other vectors
+        similarities = np.linalg.norm(concept_values - result, axis=1).flatten()
 
-@app.get("/users/{user_id}")
-async def read_user(user_id: str):
-    return {"user_id": user_id}
+    # get index of top k similarities
+    top_k_indices = np.argpartition(similarities, -k)[-k:]
 
-@app.get("/models/{model_name}")
-async def get_model(model_name: ModelName):
-    if model_name is ModelName.alexnet:
-        return {"model_name": model_name, "message": "Deep Learning FTW!"}
+    # get top k most similar concepts as a dict
+    top_concepts = {concept_keys[i]: float(similarities[i]) for i in top_k_indices}
+    top_concepts = dict(sorted(top_concepts.items(), key=lambda item: item[1], reverse=True))
+    return top_concepts
 
-    if model_name.value == "lenet":
-        return {"model_name": model_name, "message": "LeCNN all the images"}
 
-    return {"model_name": model_name, "message": "Have some residuals"}
+def autosuggest(query: str, limit: int) -> list:
+    # filter concept vectors based on whether query is a substring
+    query = query.lower()
+    lower_concept_vectors = map(lambda x: x.lower(), concept_vectors.keys())
+    result = [concept for concept in lower_concept_vectors if query in concept]
+    return result[:limit]
+
+
+def get_similar_concepts(concept_query: str, k: int) -> list:
+    concept = concept_vectors[concept_query]
+    similarities = cosine_similarity(concept_values, [concept]).flatten()
+    top_concepts = {}
+    for concept, similarity in zip(concept_vectors.keys(), similarities):
+        top_concepts[concept] = similarity
+    top_concepts = dict(sorted(top_concepts.items(), key=lambda item: item[1], reverse=True)[:k])
+    return top_concepts
+
+
+
+st.title("BioConceptVec Exploration App")
+
+option = st.selectbox(
+    "What would you like to do?",
+    ("Compute expression", "Autosuggest", "Get similar concepts"))
+
+# Initialize session state for the query if it doesn't exist yet
+if 'query' not in st.session_state:
+    st.session_state['query'] = ''
+
+if option == "Compute expression":
+    st.session_state.query = st.text_input("Enter your expression", st.session_state.query)
+    suggestions = autosuggest(st.session_state.query, 10)  # Adjust the limit based on your needs
+    st.write("Suggestions:", suggestions)
+
+    k = st.number_input("Enter the number of top similar concepts", min_value=1, value=10, step=1)
+    if st.button("Compute"):
+        result = compute_expression(st.session_state.query, k)
+        st.write(result)
+elif option == "Autosuggest":
+    st.session_state.query = st.text_input("Enter your query", st.session_state.query)
+    suggestions = autosuggest(st.session_state.query, 10)
+    st.write("Suggestions:", suggestions)
+
+    limit = st.number_input("Enter the limit", min_value=1, value=10, step=1)
+    if st.button("Suggest"):
+        result = autosuggest(st.session_state.query, limit)
+        st.write(result)
+elif option == "Get similar concepts":
+    st.session_state.query = st.text_input("Enter your concept query", st.session_state.query)
+    suggestions = autosuggest(st.session_state.query, 10)
+    st.write("Suggestions:", suggestions)
+
+    k = st.number_input("Enter the number of top similar concepts", min_value=1, value=10, step=1)
+    if st.button("Get"):
+        result = get_similar_concepts(st.session_state.query, k)
+        st.write(result)
