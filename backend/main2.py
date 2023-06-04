@@ -2,6 +2,7 @@ import streamlit as st
 import numpy as np
 import faiss
 import pandas as pd
+import streamlit_pandas as sp
 from sentence_transformers import SentenceTransformer
 
 # Load concept_descriptions function
@@ -75,3 +76,4 @@ if user_input:
             end_index = option.find('|')
             extracted_string = option[start_index:end_index].strip()
             st.write(extracted_string)
+            age = st.slider('What threshold of similarity would you like?', 0.0, 1.0, 0.8)
