@@ -4,8 +4,13 @@ import faiss
 import pandas as pd
 import streamlit_pandas as sp
 from sentence_transformers import SentenceTransformer
+from api import free_var_search
 
 # Load concept_descriptions function
+
+
+# load concept embedding for all API calls
+st.write("Cold start - loading concept embeddings...")
 
 
 @st.cache_data
@@ -44,6 +49,8 @@ d = sentence_embeddings.shape[1]
 index = faiss.IndexFlatL2(d)
 index.add(sentence_embeddings)
 
+st.write("Done!")
+
 
 def process_input(user_input):
     k = 8
@@ -61,7 +68,7 @@ def select_option(options):
 
 
 # Set up the Streamlit page
-st.title("Concept Explorer")
+st.title("BioConceptVec Exploration App")
 
 # Get the user's input
 user_input = st.text_input("Enter a concept:")
@@ -71,9 +78,26 @@ if user_input:
     if options:
         option = select_option(options)
         if option:
-            # st.write(concept_descriptions[int(option.split(':')[0])])
             start_index = option.find(':') + 1
             end_index = option.find('|')
             extracted_string = option[start_index:end_index].strip()
             st.write(extracted_string)
-            age = st.slider('What threshold of similarity would you like?', 0.0, 1.0, 0.8)
+            # Make an input box from 0.0 to 1.0 by increments of 0.1 multiselect
+            threshold = st.multiselect(
+                'Select a threshold:', [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
+            if threshold:
+                threshold = threshold[0]
+                free_var_search(extracted_string, threshold,
+                                use_gpt=True, top_k=10)
+                import streamlit as st
+                import pandas as pd
+
+                # Load the CSV file
+                data = pd.read_csv('results.csv')
+
+                # Display a download button
+                st.download_button(label='Download CSV', data=data.to_csv(
+                ), file_name='res.csv', mime='text/csv')
+
+                # Show the dataframe
+                # sp.write(data)

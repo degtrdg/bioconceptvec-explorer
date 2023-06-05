@@ -13,9 +13,7 @@ with open("../embeddings/concept_glove.json") as json_file:
 st.write("Done!")
 
 
-def compute_expression(
-    expression: str, k: int = 10, useCosineSimilarity: bool = True
-) -> dict:
+def compute_expression(expression: str, k: int = 10, useCosineSimilarity: bool = True) -> dict:
     # remove whitespace
     expression = expression.replace(" ", "")
     if expression[0] != "-":
@@ -43,16 +41,17 @@ def compute_expression(
         similarities = cosine_similarity(concept_values, [result]).flatten()
     else:
         # compute distance between x vector and all other vectors
-        similarities = np.linalg.norm(concept_values - result, axis=1).flatten()
+        similarities = np.linalg.norm(
+            concept_values - result, axis=1).flatten()
 
     # get index of top k similarities
     top_k_indices = np.argpartition(similarities, -k)[-k:]
 
     # get top k most similar concepts as a dict
-    top_concepts = {concept_keys[i]: float(similarities[i]) for i in top_k_indices}
-    top_concepts = dict(
-        sorted(top_concepts.items(), key=lambda item: item[1], reverse=True)
-    )
+    top_concepts = {concept_keys[i]: float(
+        similarities[i]) for i in top_k_indices}
+    top_concepts = dict(sorted(top_concepts.items(),
+                        key=lambda item: item[1], reverse=True))
     return top_concepts
 
 
@@ -70,19 +69,13 @@ def get_similar_concepts(concept_query: str, k: int) -> list:
     top_concepts = {}
     for concept, similarity in zip(concept_vectors.keys(), similarities):
         top_concepts[concept] = similarity
-    top_concepts = dict(
-        sorted(top_concepts.items(), key=lambda item: item[1], reverse=True)[:k]
-    )
+    top_concepts = dict(sorted(top_concepts.items(),
+                        key=lambda item: item[1], reverse=True)[:k])
     return top_concepts
 
 
-if __name__ == "__main__":
-    st.title("BioConceptVec Exploration App")
 
-    option = st.selectbox(
-        "What would you like to do?",
-        ("Compute expression", "Autosuggest", "Get similar concepts"),
-    )
+st.title("BioConceptVec Exploration App")
 
     # Initialize session state for the query if it doesn't exist yet
     if "query" not in st.session_state:
@@ -97,33 +90,36 @@ if __name__ == "__main__":
         )  # Adjust the limit based on your needs
         st.write("Suggestions:", suggestions)
 
-        k = st.number_input(
-            "Enter the number of top similar concepts", min_value=1, value=10, step=1
-        )
-        if st.button("Compute"):
-            result = compute_expression(st.session_state.query, k)
-            st.write(result)
-    elif option == "Autosuggest":
-        st.session_state.query = st.text_input(
-            "Enter your query", st.session_state.query
-        )
-        suggestions = autosuggest(st.session_state.query, 10)
-        st.write("Suggestions:", suggestions)
+if option == "Compute expression":
+    st.session_state.query = st.text_input(
+        "Enter your expression", st.session_state.query)
+    # Adjust the limit based on your needs
+    suggestions = autosuggest(st.session_state.query, 10)
+    st.write("Suggestions:", suggestions)
 
-        limit = st.number_input("Enter the limit", min_value=1, value=10, step=1)
-        if st.button("Suggest"):
-            result = autosuggest(st.session_state.query, limit)
-            st.write(result)
-    elif option == "Get similar concepts":
-        st.session_state.query = st.text_input(
-            "Enter your concept query", st.session_state.query
-        )
-        suggestions = autosuggest(st.session_state.query, 10)
-        st.write("Suggestions:", suggestions)
+    k = st.number_input(
+        "Enter the number of top similar concepts", min_value=1, value=10, step=1)
+    if st.button("Compute"):
+        result = compute_expression(st.session_state.query, k)
+        st.write(result)
+elif option == "Autosuggest":
+    st.session_state.query = st.text_input(
+        "Enter your query", st.session_state.query)
+    suggestions = autosuggest(st.session_state.query, 10)
+    st.write("Suggestions:", suggestions)
 
-        k = st.number_input(
-            "Enter the number of top similar concepts", min_value=1, value=10, step=1
-        )
-        if st.button("Get"):
-            result = get_similar_concepts(st.session_state.query, k)
-            st.write(result)
+    limit = st.number_input("Enter the limit", min_value=1, value=10, step=1)
+    if st.button("Suggest"):
+        result = autosuggest(st.session_state.query, limit)
+        st.write(result)
+elif option == "Get similar concepts":
+    st.session_state.query = st.text_input(
+        "Enter your concept query", st.session_state.query)
+    suggestions = autosuggest(st.session_state.query, 10)
+    st.write("Suggestions:", suggestions)
+
+    k = st.number_input(
+        "Enter the number of top similar concepts", min_value=1, value=10, step=1)
+    if st.button("Get"):
+        result = get_similar_concepts(st.session_state.query, k)
+        st.write(result)

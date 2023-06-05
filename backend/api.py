@@ -8,6 +8,7 @@ import numpy as np
 import re
 import os
 import json
+import modal
 from fastapi import FastAPI
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -37,6 +38,16 @@ def get_prompt(query: str):
 
         Really try to think outside the box to find why this could be reasonable. Use this as a generative way to help think of biological hypotheses.
         """
+
+
+mounts = [
+    modal.Mount.from_local_dir(
+        "./embeddings/", remote_path="/root/embeddings/"),
+]
+
+image = modal.Image.debian_slim().pip_install_from_requirements("requirements.txt")
+
+stub = modal.Stub("bioconceptvec", image=image, mounts=mounts)
 
 
 def gpt(prompt):
@@ -169,7 +180,7 @@ def get_similar_concepts(concept_query: str, k: int) -> list:
 
 @stub.function()
 @modal.web_endpoint(method="GET")
-def free_var_search(term: str, sim_threshold=0.7, n=100, use_gpt=False):
+def free_var_search(term: str, sim_threshold=0.7, n=100, top_k=3, use_gpt=False):
     term_vec = concept_vectors[term]
     expressions = []
 
@@ -194,6 +205,14 @@ def free_var_search(term: str, sim_threshold=0.7, n=100, use_gpt=False):
             print(
                 f"Expression: {equation} | Solution: {concept} | Similarity: {sim}")
 
+    df = pd.DataFrame(good_equations, columns=[
+                      "Equation", "Concept", "Similarity"])
+    # Sort by similarity
+    df = df.sort_values(by=["Similarity"], ascending=False)
+    df = df.reset_index(drop=True)
+    # Pick top k
+    df = df[:top_k]
+
     # now we use gpt to generate a rationale for each equation using the prompt
     if use_gpt:
         rationales = []
@@ -204,6 +223,7 @@ def free_var_search(term: str, sim_threshold=0.7, n=100, use_gpt=False):
             time.sleep(0.5)
 
         df["Rationale"] = rationales
+
     df.to_csv("results.csv", index=False)
 
     return df

@@ -6,3 +6,4 @@ venv/
 *.bin
 notes.md
 .env
+mappings/description_embeddings
