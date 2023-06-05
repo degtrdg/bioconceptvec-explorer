@@ -40,16 +40,6 @@ def get_prompt(query: str):
         """
 
 
-mounts = [
-    modal.Mount.from_local_dir(
-        "./embeddings/", remote_path="/root/embeddings/"),
-]
-
-image = modal.Image.debian_slim().pip_install_from_requirements("requirements.txt")
-
-stub = modal.Stub("bioconceptvec", image=image, mounts=mounts)
-
-
 def gpt(prompt):
     load_openai_key("./.env")
     messageList = [
