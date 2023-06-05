@@ -264,7 +264,6 @@ def free_var_search(term: str, sim_threshold=0.7, n=100, top_k=3, use_gpt=False)
             mapped_eq = row[1]["Equation_mapped"]
             prompt = get_prompt(mapped_eq)
             rationales.append(gpt(prompt))
-            time.sleep(0.5)
 
         df["Rationale"] = rationales
 
