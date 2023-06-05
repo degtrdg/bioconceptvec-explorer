@@ -3,7 +3,7 @@ import streamlit as st
 import pickle
 import dotenv
 import numpy as np
-import tqdm
+from tqdm import tqdm
 import openai
 import os
 import faiss
@@ -20,6 +20,7 @@ st.write("Cold start - loading concept embeddings...")
 
 @st.cache_data
 def load_concept_descriptions():
+    print("loading concept descs")
     concept_descriptions = pd.read_pickle(
         '/Users/danielgeorge/Documents/work/ml/bioconceptvec-explorer/bioconceptvec-explorer/mappings/concept_descriptions.pkl')
     return concept_descriptions
@@ -68,6 +69,7 @@ def load_rev_concept_description():
 
 
 with open("./embeddings/concept_glove.json") as json_file:
+    print("loading concept glove.json")
     concept_vectors = json.load(json_file)
     concept_keys = list(concept_vectors.keys())
     concept_values = np.array(list(concept_vectors.values()), dtype=np.float32)
@@ -210,6 +212,7 @@ def get_similar_concepts(concept_query: str, k: int) -> list:
 
 
 def free_var_search(term: str, sim_threshold=0.7, n=100, top_k=3, use_gpt=False):
+    print("Running free var search!!")
     term_vec = concept_vectors[term]
     expressions = []
 
@@ -240,7 +243,19 @@ def free_var_search(term: str, sim_threshold=0.7, n=100, top_k=3, use_gpt=False)
     df = df.sort_values(by=["Similarity"], ascending=False)
     df = df.reset_index(drop=True)
     # Pick top k
-    df = df[:top_k]
+    df = df.head(10)
+
+    eq_mapped = []
+    for row in good_equations:
+        eq_mapped.append(
+            " ".join(
+                [str(concept_descriptions[i])
+                 for i in row[0] if i != "+" and i != "-"]
+            )
+        )
+    df["Equation_mapped"] = eq_mapped
+    df["Concept Description"] = df["Concept"].apply(
+        lambda x: concept_descriptions[x])
 
     # now we use gpt to generate a rationale for each equation using the prompt
     if use_gpt:
@@ -306,4 +321,4 @@ if user_input:
                 ), file_name='res.csv', mime='text/csv')
 
                 # Show the dataframe
-                # sp.write(data)
+                sp.write(data)
